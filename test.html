@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Тест карты + Open-Meteo</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        #map { height: 400px; margin: 20px; }
+        .charts { display: flex; gap: 20px; flex-wrap: wrap; padding: 20px; }
+        canvas { max-width: 300px; max-height: 200px; }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+<div class="charts">
+    <canvas id="tempChart"></canvas>
+    <canvas id="rainChart"></canvas>
+    <canvas id="windChart"></canvas>
+</div>
+<script>
+    // Карта
+    const map = L.map('map').setView([55.75, 37.62], 10);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
+    
+    // Маркер (Москва)
+    const marker = L.marker([55.751244, 37.618423]).addTo(map);
+    marker.bindPopup("Москва").openPopup();
+    
+    // Запрос погоды Open-Meteo
+    async function loadWeather() {
+        const url = 'https://api.open-meteo.com/v1/forecast?latitude=55.75&longitude=37.62&daily=temperature_2m_max,precipitation_sum,windspeed_10m_max&timezone=auto';
+        const resp = await fetch(url);
+        const data = await resp.json();
+        const dates = data.daily.time;
+        const temps = data.daily.temperature_2m_max;
+        const rains = data.daily.precipitation_sum;
+        const winds = data.daily.windspeed_10m_max;
+        
+        new Chart(document.getElementById('tempChart'), {
+            type: 'line', data: { labels: dates, datasets: [{ label: 'Температура °C', data: temps }] }
+        });
+        new Chart(document.getElementById('rainChart'), {
+            type: 'bar', data: { labels: dates, datasets: [{ label: 'Осадки мм', data: rains }] }
+        });
+        new Chart(document.getElementById('windChart'), {
+            type: 'line', data: { labels: dates, datasets: [{ label: 'Ветер м/с', data: winds }] }
+        });
+    }
+    loadWeather();
+</script>
+</body>
+</html>

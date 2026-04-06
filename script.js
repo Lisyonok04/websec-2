@@ -18,29 +18,15 @@ async function loadCities() {
     // Пытаемся загрузить russia-cities.json
     let data = null;
     try {
-        const response = await fetch('russia-cities.json');
+        const response = await fetch('cities.json');
         if (response.ok) {
             data = await response.json();
-            console.log(`✅ Загружен russia-cities.json, количество записей: ${data.length}`);
-        } else {
-            console.warn("russia-cities.json не найден, пробуем cities.json");
+            console.log(`✅ Загружен cities.json, количество записей: ${data.length}`);
         }
     } catch (e) {
-        console.warn("Ошибка загрузки russia-cities.json", e);
+            console.warn("cities.json не найден");
     }
     
-    // Если не загрузился, пробуем cities.json (простой формат)
-    if (!data) {
-        try {
-            const response = await fetch('cities.json');
-            if (response.ok) {
-                data = await response.json();
-                console.log(`✅ Загружен cities.json, количество записей: ${data.length}`);
-            }
-        } catch (e) {
-            console.warn("cities.json не найден");
-        }
-    }
     
     // Если данные есть – преобразуем в единый формат
     if (data && Array.isArray(data)) {
@@ -163,19 +149,13 @@ searchInput.addEventListener('keypress', (e) => {
 // ------------------- 6. РАБОТА С ПОГОДНЫМ API -------------------
 const API_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc1Mzg3MjA1LCJpYXQiOjE3NzUzODY5MDUsImp0aSI6ImYwNjQ2NzU1NDY2ZTRmMDk4YjJmZjc0ODJjYWU0OWMxIiwidXNlcl9pZCI6IjM2NTQifQ.TXWDYHAIz-VBflSnF4mbF79GGisZOTeg9y2ANTSw6vI';
 const API_URL = 'https://api.projecteol.ru/v1/forecast/';
-
 async function fetchWeather(lat, lon, cityName) {
     try {
         document.getElementById('weather-title').innerHTML = `⏳ Загрузка погоды для ${cityName}...`;
-        
-        // Если нет токена – показываем демо-данные
-        if (API_TOKEN === 'ТВОЙ_УНИКАЛЬНЫЙ_ТОКЕН') {
-            console.warn("⚠️ Не задан API-ключ. Используем демонстрационные данные.");
-            showDemoWeather(cityName);
-            return;
-        }
-        
-        const url = `${API_URL}?lat=${lat}&lon=${lon}&token=${API_TOKEN}`;
+
+        //const url = `${API_URL}?lat=${lat}&lon=${lon}&token=${API_TOKEN}`;
+        const today = new Date().toISOString().split('T')[0];
+        const url = `http://localhost:8080/weather?lat=${lat}&lon=${lon}&date=${today}&token=${API_TOKEN}`;
         const response = await fetch(url);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
@@ -200,9 +180,45 @@ function showDemoWeather(cityName) {
 }
 
 function processWeatherData(data, cityName) {
-    // Здесь должен быть разбор реального ответа от projecteol
-    // Пока заглушка – вызываем демо
-    showDemoWeather(cityName);
+    // data - это массив почасовых прогнозов
+    if (!Array.isArray(data) || data.length === 0) {
+        console.error("Нет данных от API", data);
+        showDemoWeather(cityName);
+        return;
+    }
+
+    // Группируем по дням
+    const daily = {};
+    data.forEach(item => {
+        const date = item.dt_forecast.split(' ')[0]; // "2026-04-06"
+        if (!daily[date]) {
+            daily[date] = { temps: [], rains: [], winds: [] };
+        }
+        daily[date].temps.push(item.temp_2_cel);
+        daily[date].rains.push(item.prate);
+        daily[date].winds.push(item.wind_speed_10);
+    });
+
+    // Вычисляем средние за день
+    const dates = [];
+    const temps = [];
+    const rains = [];
+    const winds = [];
+
+    for (const [date, values] of Object.entries(daily)) {
+        dates.push(date);
+        const avgTemp = values.temps.reduce((a,b) => a+b,0) / values.temps.length;
+        temps.push(avgTemp.toFixed(1));
+        const totalRain = values.rains.reduce((a,b) => a+b,0);
+        rains.push(totalRain.toFixed(1));
+        const avgWind = values.winds.reduce((a,b) => a+b,0) / values.winds.length;
+        winds.push(avgWind.toFixed(1));
+    }
+
+    document.getElementById('weather-title').innerHTML = `🌤️ Прогноз погоды: ${cityName}`;
+    updateChart('tempChart', dates, temps, 'Температура (°C)', 'rgba(255,99,132,0.2)', 'rgba(255,99,132,1)', 'line');
+    updateChart('rainChart', dates, rains, 'Осадки (мм)', 'rgba(54,162,235,0.2)', 'rgba(54,162,235,1)', 'bar');
+    updateChart('windChart', dates, winds, 'Ветер (м/с)', 'rgba(75,192,192,0.2)', 'rgba(75,192,192,1)', 'line');
 }
 
 // ------------------- 7. ОТРИСОВКА ГРАФИКОВ -------------------
