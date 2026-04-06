@@ -8,35 +8,31 @@
     <!-- Leaflet (карта) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Chart.js (графики) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
-    <!-- Подключаем отдельный файл со стилями -->
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 <div class="app-container">
-    <!-- Карта -->
     <div class="map-container">
         <div id="map"></div>
     </div>
-
-    <!-- Правая панель с графиками и поиском -->
     <div class="dashboard">
         <div class="search-section">
             <h3>🔍 Найти населённый пункт</h3>
             <div class="search-box">
-                <input type="text" id="city-search" placeholder="Например: Москва, Санкт-Петербург, Новосибирск..." autocomplete="off">
+                <input type="text" id="city-search" placeholder="Например: Москва, Санкт-Петербург..." autocomplete="off">
                 <button id="search-btn">Найти</button>
             </div>
             <div style="font-size: 12px; color: #6c757d; margin-top: 8px;">
                 ⚡ Кликните по маркеру на карте или найдите город через поиск
             </div>
         </div>
-
         <div class="weather-header">
             <div id="weather-title">🌤️ Выберите город на карте</div>
         </div>
-
         <div class="charts-container">
             <div class="chart-card">
                 <h4>🌡️ Температура (°C)</h4>
@@ -51,41 +47,11 @@
                 <canvas id="windChart" width="400" height="200"></canvas>
             </div>
         </div>
-        
         <div class="placeholder-message" id="info-message" style="display: none;">
-            💡 Нажмите на любой город на карте, чтобы увидеть прогноз на несколько дней
+            💡 Нажмите на любой город на карте, чтобы увидеть прогноз
         </div>
     </div>
 </div>
-
-<!-- Подключаем основной скрипт приложения -->
 <script src="script.js"></script>
-
-<!-- Дополнительный скрипт для управления заглушкой -->
-<script>
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            const tempCanvas = document.getElementById('tempChart');
-            if (tempCanvas && !tempCanvas.getAttribute('data-chart-initialized')) {
-                document.getElementById('info-message').style.display = 'block';
-            }
-        }, 3000);
-    });
-    
-    const originalUpdateChart = window.updateChart;
-    if (!originalUpdateChart) {
-        window.addEventListener('DOMContentLoaded', () => {
-            if (window.updateChart) {
-                const orig = window.updateChart;
-                window.updateChart = function(...args) {
-                    document.getElementById('info-message').style.display = 'none';
-                    const canvas = document.getElementById(args[0]);
-                    if (canvas) canvas.setAttribute('data-chart-initialized', 'true');
-                    return orig.apply(this, args);
-                };
-            }
-        });
-    }
-</script>
 </body>
 </html>
