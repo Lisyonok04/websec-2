@@ -155,7 +155,7 @@ async function fetchWeather(lat, lon, cityName) {
 
         //const url = `${API_URL}?lat=${lat}&lon=${lon}&token=${API_TOKEN}`;
         const today = new Date().toISOString().split('T')[0];
-        const url = `http://localhost:8080/weather?lat=${lat}&lon=${lon}&date=${today}&token=${API_TOKEN}`;
+        const url = `https://projecteol.ru/api/weather/?lat=${lat}&lon=${lon}&date=${today}&token=${API_TOKEN}`;
         const response = await fetch(url);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
