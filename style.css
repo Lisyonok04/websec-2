@@ -11,14 +11,12 @@ body {
     overflow: hidden;
 }
 
-/* Основной контейнер: карта + панель */
 .app-container {
     display: flex;
     height: 100vh;
     width: 100%;
 }
 
-/* Левая часть — карта */
 .map-container {
     flex: 2;
     position: relative;
@@ -34,7 +32,6 @@ body {
     border-radius: 12px;
 }
 
-/* Правая панель — поиск + графики */
 .dashboard {
     flex: 1.2;
     background: white;
@@ -47,7 +44,6 @@ body {
     padding: 20px;
 }
 
-/* Поиск */
 .search-section {
     margin-bottom: 25px;
     background: #f8f9fa;
@@ -97,7 +93,6 @@ body {
     background: #1f5e7a;
 }
 
-/* Заголовок погоды */
 .weather-header {
     margin: 10px 0 20px 0;
     text-align: center;
@@ -105,14 +100,13 @@ body {
 
 #weather-title {
     font-size: 1.5rem;
-    font-weight: 600;
+    font-weight: 700;
     color: #0b3b4f;
     border-bottom: 3px solid #2c7da0;
     display: inline-block;
     padding-bottom: 5px;
 }
 
-/* Блоки графиков */
 .charts-container {
     display: flex;
     flex-direction: column;
@@ -141,7 +135,6 @@ canvas {
     width: 100%;
 }
 
-/* Информация при отсутствии данных */
 .placeholder-message {
     text-align: center;
     color: #6c757d;
@@ -151,7 +144,6 @@ canvas {
     margin-top: 20px;
 }
 
-/* Адаптивность */
 @media (max-width: 800px) {
     .app-container {
         flex-direction: column;
@@ -168,14 +160,12 @@ canvas {
     }
 }
 
-/* Стили для всплывающих подсказок Leaflet (немного улучшим) */
 .leaflet-popup-content {
     font-size: 14px;
     font-weight: 500;
     color: #1e4663;
 }
 
-/* Скролл для панели */
 .dashboard::-webkit-scrollbar {
     width: 6px;
 }

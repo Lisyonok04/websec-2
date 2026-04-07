@@ -1,23 +1,12 @@
-// ------------------- 1. КАРТА -------------------
 let map = L.map('map').setView([64.0, 100.0], 4);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
 
 let cities = [];
 let markers = {};
 
-// ------------------- 2. ЗАГРУЗКА ГОРОДОВ -------------------
 async function loadCities() {
     console.log("Загрузка городов...");
     try {
-        const response = await fetch('russia-cities.json');
-        if (!response.ok) throw new Error();
-        const raw = await response.json();
-        if (raw[0] && raw[0].coords) {
-            cities = raw.map(c => ({ name: c.name, latitude: c.coords.lat, longitude: c.coords.lon }));
-        } else throw new Error();
-    } catch(e) {
-        console.warn("russia-cities.json не загружен, пробуем cities.json");
-        try {
             const response = await fetch('cities.json');
             const raw = await response.json();
             if (raw[0] && typeof raw[0].lat === 'number') {
@@ -35,7 +24,6 @@ async function loadCities() {
                 { name: "Казань", latitude: 55.796127, longitude: 49.106405 }
             ];
         }
-    }
     console.log(`Загружено городов: ${cities.length}`);
     addMarkersToMap();
 }
@@ -53,7 +41,6 @@ function addMarkersToMap() {
     if (cities.length) map.setView([cities[0].latitude, cities[0].longitude], 6);
 }
 
-// ------------------- 3. ПОИСК -------------------
 const searchInput = document.getElementById('city-search');
 const searchBtn = document.getElementById('search-btn');
 
@@ -71,10 +58,9 @@ function searchCity() {
 searchBtn.addEventListener('click', searchCity);
 searchInput.addEventListener('keypress', e => e.key === 'Enter' && searchCity());
 
-// ------------------- 4. ПОГОДА (Open-Meteo) -------------------
 async function fetchWeather(lat, lon, cityName) {
     try {
-        document.getElementById('weather-title').innerHTML = `⏳ Загрузка погоды для ${cityName}...`;
+        document.getElementById('weather-title').innerHTML = `⏳ Загрузка погоды для города ${cityName}...`;
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max&timezone=auto&forecast_days=7`;
         const response = await fetch(url);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -107,7 +93,6 @@ function showDemoWeather(cityName) {
     createOrUpdateChart('windChart', dates, winds, 'Ветер (м/с)', 'rgba(75,192,192,0.2)', 'rgba(75,192,192,1)', 'line');
 }
 
-// ------------------- 5. ГРАФИКИ (абсолютно надёжная версия) -------------------
 function createOrUpdateChart(chartId, labels, data, label, bgColor, borderColor, type) {
     const canvas = document.getElementById(chartId);
     if (!canvas) {
@@ -115,14 +100,12 @@ function createOrUpdateChart(chartId, labels, data, label, bgColor, borderColor,
         return;
     }
     
-    // Проверяем, существует ли уже график и можно ли его обновить
     if (window[chartId] && typeof window[chartId].destroy === 'function') {
         window[chartId].destroy();
         window[chartId] = null;
     }
     
     try {
-        // Создаём новый график
         window[chartId] = new Chart(canvas.getContext('2d'), {
             type: type,
             data: {
@@ -145,10 +128,8 @@ function createOrUpdateChart(chartId, labels, data, label, bgColor, borderColor,
         console.error(`Ошибка создания графика ${chartId}:`, e);
     }
     
-    // Скрываем заглушку
     const infoMsg = document.getElementById('info-message');
     if (infoMsg) infoMsg.style.display = 'none';
 }
 
-// ------------------- 6. ЗАПУСК -------------------
 document.addEventListener('DOMContentLoaded', loadCities);
