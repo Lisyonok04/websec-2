@@ -1,5 +1,7 @@
 let map = L.map('map').setView([64.0, 100.0], 4);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+}).addTo(map);
 
 let cities = [];
 let markers = {};
@@ -32,7 +34,14 @@ function addMarkersToMap() {
     Object.values(markers).forEach(m => map.removeLayer(m));
     markers = {};
     cities.forEach(city => {
-        const marker = L.marker([city.latitude, city.longitude]).addTo(map);
+        const marker = L.circleMarker([city.latitude, city.longitude], {
+            radius: 8,
+            fillColor: '#2c7da0',
+            color: '#0c4f6c',
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8        
+        }).addTo(map);
         marker.on('click', () => fetchWeather(city.latitude, city.longitude, city.name));
         marker.bindTooltip(city.name);
         markers[city.name] = marker;
